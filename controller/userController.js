@@ -51,9 +51,11 @@ exports.postLogin = async (req, res) => {
   }
 };
 
+
+// get-current-user
 exports.getCurrentUser = async (req, res) => {
   try {
-    // Find the current user by ID and exclude password field
+    // Find the user by ID and exclude password field
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
