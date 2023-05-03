@@ -1,26 +1,50 @@
 const User = require("../model/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const validator = require('validator');
 
-// registe new user
+
 exports.postSignUp = async (req, res) => {
   try {
-    const existingUser = await User.findOne({ email: req.body.email });
+    // Check if all fields are provided
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Validate email
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    // Validate password
+    if (!validator.isLength(password, { min: 3, max: 15 })) {
+      return res.status(400).json({ error: 'Password must be between 3 and 15 characters long' });
+    }
+
+    // Validate username
+    if (!validator.matches(username, /^[a-zA-Z0-9_]+$/)) {
+      return res.status(400).json({ error: 'Username should not contain special characters except _' });
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
     req.body.password = hashedPassword;
 
     const newUser = new User(req.body);
     await newUser.save();
-    res.json({ message: "User created successfully" });
+    res.json({ message: 'User created successfully' });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 // login user
 exports.postLogin = async (req, res) => {
@@ -52,7 +76,7 @@ exports.postLogin = async (req, res) => {
 };
 
 
-// get-current-user
+// get current user
 exports.getCurrentUser = async (req, res) => {
   try {
     // Find the user by ID and exclude password field
