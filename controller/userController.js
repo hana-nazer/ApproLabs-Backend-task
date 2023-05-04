@@ -32,11 +32,9 @@ exports.postSignUp = async (req, res) => {
 
     // Validate username
     if (!validator.matches(username, /^[a-zA-Z0-9_]+$/)) {
-      return res
-        .status(400)
-        .json({
-          error: "Username should not contain special characters except _",
-        });
+      return res.status(400).json({
+        error: "Username should not contain special characters except _",
+      });
     }
 
     // hash the password
@@ -102,7 +100,6 @@ exports.getCurrentUser = async (req, res) => {
     }
 
     res.json({
-      success: true,
       message: "User details fetched successfully",
       data: user,
     });
