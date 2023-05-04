@@ -59,7 +59,7 @@ exports.postLogin = async (req, res) => {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ error: "Both email and password are required" });
+        .json({ error: "All fields are required" });
     }
 
     // Validate the email format
@@ -69,6 +69,7 @@ exports.postLogin = async (req, res) => {
 
     // check if user exists
     const user = await User.findOne({ email });
+    console.log(user);
     if (!user) {
       return res.status(401).json({ error: "User does not exist" });
     }
