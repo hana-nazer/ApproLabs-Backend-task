@@ -1,11 +1,11 @@
 const userController = require("./userController");
 const User = require("../model/userModel");
 const validator = require("validator");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 jest.mock("../model/userModel");
 jest.mock("validator");
-jest.mock("bcrypt");
+jest.mock("bcryptjs");
 
 describe("postSignUp function", () => {
   let req;

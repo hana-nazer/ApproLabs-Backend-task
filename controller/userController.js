@@ -1,8 +1,6 @@
 const User = require("../model/userModel");
 const bcrypt = require("bcryptjs");
-const { log } = require("console");
 const jwt = require("jsonwebtoken");
-const Logger = require("nodemon/lib/utils/log");
 const validator = require("validator");
 
 // Signup
@@ -67,23 +65,19 @@ exports.postLogin = async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "User does not exist" });
     }
-    console.log("user");
-    console.log(user);
+   
 
     // check password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: "Invalid password" });
     }
-    console.log("valid password");
-    console.log(validPassword);
-
+  
     // token creation
     const token = jwt.sign({ userId: user._id }, process.env.SECRET, {
       expiresIn: "1d",
     });
-    console.log("token");
-    console.log(token);
+   
 
     res.status(200).json({ message: "User logged in successfully", token });
   } catch (error) {
