@@ -69,7 +69,7 @@ describe("postLogin function", () => {
 
   it("returns a token when user is authenticated", async () => {
     User.findOne.mockReturnValue({
-      email: "test@gmail.com",
+      email: "test@example.com",
       password: "123",
     });
     bcrypt.compare.mockReturnValue(true);
