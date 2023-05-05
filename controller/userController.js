@@ -1,5 +1,6 @@
 const User = require("../model/userModel");
 const bcrypt = require("bcryptjs");
+const { log } = require("console");
 const jwt = require("jsonwebtoken");
 const validator = require("validator");
 
@@ -78,10 +79,10 @@ exports.postLogin = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.SECRET, {
       expiresIn: "1d",
     });
+
    return res.status(200).json({ message: "User logged in successfully", token });
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
