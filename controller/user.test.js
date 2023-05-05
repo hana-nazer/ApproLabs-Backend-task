@@ -1,54 +1,65 @@
-const userController = require("./userController");
-const User = require("../model/userModel");
+const { getCurrentUser } = require('./userController');
+const User = require('../model/userModel');
 
-jest.mock("../model/userModel");
-
-describe("getCurrentUser function", () => {
-  let req;
-  let res;
-
-  beforeEach(() => {
-    req = {
-      params: {
-        id: "testuserid",
-      },
+describe('getCurrentUser', () => {
+  it('should return user details when given a valid user ID', async () => {
+    const user = {
+      _id: '123',
+      username: 'John Doe',
+      email: 'johndoe@example.com',
+      password: 'password123'
     };
-    res = {
+    jest.spyOn(User, 'findById').mockResolvedValue(user);
+
+    const req = { params: { id: '123' } };
+    const res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn()
     };
-  });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+    await getCurrentUser(req, res);
 
-  it("returns 404 if user is not found", async () => {
-    User.findById.mockResolvedValue(null);
-    await userController.getCurrentUser(req, res);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: "User not found" });
-  });
-
-  it("returns user details if user is found", async () => {
-    const mockUser = {
-      _id: "testuserid",
-      username: "testuser",
-      email: "testuser@example.com",
-      createdAt: "2023-05-03T15:00:00.000Z",
-      updatedAt: "2023-05-03T15:00:00.000Z",
-    };
-    User.findById.mockResolvedValue(mockUser);
-    await userController.getCurrentUser(req, res);
+    expect(User.findById).toHaveBeenCalledWith('123');
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
-      message: "User details fetched successfully",
+      message: 'User details fetched successfully',
       data: {
-        _id: "testuserid",
-        username: "testuser",
-        email: "testuser@example.com",
-        createdAt: "2023-05-03T15:00:00.000Z",
-        updatedAt: "2023-05-03T15:00:00.000Z",
-      },
+        _id: '123',
+        username: 'John Doe',
+        email: 'johndoe@example.com'
+      }
     });
+  });
+
+  it('should return 404 error when given an invalid user ID', async () => {
+    jest.spyOn(User, 'findById').mockResolvedValue(null);
+
+    const req = { params: { id: '456' } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await getCurrentUser(req, res);
+
+    expect(User.findById).toHaveBeenCalledWith('456');
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
+  });
+
+  it('should return 500 error when an internal server error occurs', async () => {
+    jest.spyOn(User, 'findById').mockRejectedValue(new Error('Database error'));
+
+    const req = { params: { id: '123' } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await getCurrentUser(req, res);
+
+    expect(User.findById).toHaveBeenCalledWith('123');
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
   });
 });

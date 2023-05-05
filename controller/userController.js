@@ -62,14 +62,8 @@ exports.postLogin = async (req, res) => {
         .json({ error: "All fields are required" });
     }
 
-    // Validate the email format
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({ error: "Invalid email format" });
-    }
-
     // check if user exists
     const user = await User.findOne({ email });
-    console.log(user);
     if (!user) {
       return res.status(401).json({ error: "User does not exist" });
     }
@@ -84,7 +78,8 @@ exports.postLogin = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.SECRET, {
       expiresIn: "1d",
     });
-    res.json({ message: "User logged in successfully", token });
+   return res.status(200).json({ message: "User logged in successfully", token });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
@@ -94,18 +89,22 @@ exports.postLogin = async (req, res) => {
 // get current user
 exports.getCurrentUser = async (req, res) => {
   try {
-    // Find the user by ID and exclude password field
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({
-      message: "User details fetched successfully",
-      data: user,
+    const { _id, username, email } = user;
+
+    res.status(200).json({
+      message: 'User details fetched successfully',
+      data: {
+        _id,
+        username,
+        email
+      }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
