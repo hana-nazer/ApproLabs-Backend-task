@@ -65,27 +65,24 @@ exports.postLogin = async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "User does not exist" });
     }
-   
 
     // check password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: "Invalid password" });
     }
-  
+
     // token creation
     const token = jwt.sign({ userId: user._id }, process.env.SECRET, {
       expiresIn: "1d",
     });
-   
-
     res.status(200).json({ message: "User logged in successfully", token });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// get current user
+// fetch user details
 exports.getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
