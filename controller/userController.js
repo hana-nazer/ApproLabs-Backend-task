@@ -2,6 +2,7 @@ const User = require("../model/userModel");
 const bcrypt = require("bcryptjs");
 const { log } = require("console");
 const jwt = require("jsonwebtoken");
+const Logger = require("nodemon/lib/utils/log");
 const validator = require("validator");
 
 // Signup
@@ -58,9 +59,7 @@ exports.postLogin = async (req, res) => {
     // Check if both email and password fields are provided
     const { email, password } = req.body;
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "All fields are required" });
+      return res.status(400).json({ error: "All fields are required" });
     }
 
     // check if user exists
@@ -68,20 +67,25 @@ exports.postLogin = async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "User does not exist" });
     }
+    console.log("user");
+    console.log(user);
 
     // check password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: "Invalid password" });
     }
+    console.log("valid password");
+    console.log(validPassword);
 
     // token creation
     const token = jwt.sign({ userId: user._id }, process.env.SECRET, {
       expiresIn: "1d",
     });
+    console.log("token");
+    console.log(token);
 
-   return res.status(200).json({ message: "User logged in successfully", token });
-
+    res.status(200).json({ message: "User logged in successfully", token });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -92,20 +96,20 @@ exports.getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const { _id, username, email } = user;
 
     res.status(200).json({
-      message: 'User details fetched successfully',
+      message: "User details fetched successfully",
       data: {
         _id,
         username,
-        email
-      }
+        email,
+      },
     });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
